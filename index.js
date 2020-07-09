@@ -52,10 +52,7 @@ app.get('/api/persons', (req, res) => {
 })
 
 const generateId = () => {
-  const maxId = persons.length > 0
-    ? Math.max(...persons.map(p => p.id))
-    : 0
-  return maxId + 1
+ return Math.floor(Math.random() * 100000) 
 }
 
 app.post('/api/persons', (req, res) => {
@@ -65,6 +62,11 @@ app.post('/api/persons', (req, res) => {
       })
   }
 
+   if (persons.find(p => p.name === req.body.name)) {
+        return res.status(404).json({
+            error: 'name already exists'
+        })
+    }
  // console.log(req.body)
   const person = {
     name:  req.body.name,
