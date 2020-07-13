@@ -48,6 +48,18 @@ morgan.token('body', (req) => {
       return body
   }
 })
+//error handler as a middleware
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
@@ -85,6 +97,7 @@ app.post('/api/persons', (req, res) => {
   person.save().then(result => {
     res.json(result)
 })
+.catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
@@ -108,7 +121,7 @@ app.delete('/api/persons/:id', (req, res) => {
         .then(result => {
             res.status(204).end()
         })
-        // .catch(error => next(error))
+        .catch(error => next(error))
 })
 
 const PORT = process.env.PORT || 3001
