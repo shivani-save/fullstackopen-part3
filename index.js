@@ -128,7 +128,7 @@ app.put('/api/persons/:id', (req, res, next) => {
       .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   const id = Number(req.params.id)
   Person.findByIdAndRemove(req.params.id)
         .then(result => {
