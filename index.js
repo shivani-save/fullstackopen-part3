@@ -1,7 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
+const Person = require('./models/person')
+
 
 let persons = [
     {
@@ -34,6 +37,7 @@ let persons = [
 app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
+app.use(morgan(':method :url :status :req[body] - :response-time ms :body'))
 
 morgan.token('body', (req) => {
   const body = JSON.stringify(req.body)
@@ -44,14 +48,15 @@ morgan.token('body', (req) => {
       return body
   }
 })
-app.use(morgan(':method :url :status :req[body] - :response-time ms :body'))
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then(persons => {
+    res.json(persons)
+})
 })
 
 const generateId = () => {
@@ -65,22 +70,21 @@ app.post('/api/persons', (req, res) => {
       })
   }
 
-   if (persons.find(p => p.name === req.body.name)) {
-        return res.status(404).json({
-            error: 'name must be unique'
-        })
-    }
+  //  if (persons.find(p => p.name === req.body.name)) {
+  //       return res.status(404).json({
+  //           error: 'name must be unique'
+  //       })
+  //   }
  // console.log(req.body)
-  const person = {
+  const person = new Person({
     name:  req.body.name,
     number: req.body.number,
     id: generateId(),
-  }
+  })
 
-  console.log(person)
-  persons = persons.concat(person)
-
-  res.json(person)
+  person.save().then(result => {
+    res.json(result)
+})
 })
 
 app.get('/info', (req, res) => {
